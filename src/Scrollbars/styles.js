@@ -37,12 +37,12 @@ export const viewStyleUniversalInitial = {
 
 export const trackHorizontalStyleDefault = {
     position: 'absolute',
-    height: 6
+    height: 2
 };
 
 export const trackVerticalStyleDefault = {
     position: 'absolute',
-    width: 6
+    width: 2
 };
 
 export const thumbHorizontalStyleDefault = {
