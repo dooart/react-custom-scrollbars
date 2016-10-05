@@ -60,6 +60,10 @@ export default createClass({
             PropTypes.number,
             PropTypes.string
         ]),
+        browserScrollbarWidth: PropTypes.oneOfType([
+            PropTypes.number,
+            PropTypes.string
+        ]),
         universal: PropTypes.bool,
         style: PropTypes.object,
         children: PropTypes.node,
@@ -81,6 +85,7 @@ export default createClass({
             autoHeight: false,
             autoHeightMin: 0,
             autoHeightMax: 200,
+            browserScrollbarWidth: 0,
             universal: false,
         };
     },
@@ -112,6 +117,12 @@ export default createClass({
         caf(this.requestFrame);
         clearTimeout(this.hideTracksTimeout);
         clearInterval(this.detectScrollingInterval);
+    },
+
+    getBrowserScrollbarWidth() {
+        const { browserScrollbarWidth } = this.props;
+        if (browserScrollbarWidth > 0) return browserScrollbarWidth;
+        return getScrollbarWidth();
     },
 
     getScrollLeft() {
@@ -240,7 +251,7 @@ export default createClass({
         if (typeof document === 'undefined') return;
         const { view, trackHorizontal, trackVertical, thumbHorizontal, thumbVertical } = this.refs;
         view.addEventListener('scroll', this.handleScroll);
-        if (!getScrollbarWidth()) return;
+        if (!this.getBrowserScrollbarWidth()) return;
         trackHorizontal.addEventListener('mouseenter', this.handleTrackMouseEnter);
         trackHorizontal.addEventListener('mouseleave', this.handleTrackMouseLeave);
         trackHorizontal.addEventListener('mousedown', this.handleHorizontalTrackMouseDown);
@@ -257,7 +268,7 @@ export default createClass({
         if (typeof document === 'undefined') return;
         const { view, trackHorizontal, trackVertical, thumbHorizontal, thumbVertical } = this.refs;
         view.removeEventListener('scroll', this.handleScroll);
-        if (!getScrollbarWidth()) return;
+        if (!this.getBrowserScrollbarWidth()) return;
         trackHorizontal.removeEventListener('mouseenter', this.handleTrackMouseEnter);
         trackHorizontal.removeEventListener('mouseleave', this.handleTrackMouseLeave);
         trackHorizontal.removeEventListener('mousedown', this.handleHorizontalTrackMouseDown);
@@ -473,7 +484,7 @@ export default createClass({
     _update(callback) {
         const { onUpdate, hideTracksWhenNotNeeded } = this.props;
         const values = this.getValues();
-        if (getScrollbarWidth()) {
+        if (this.getBrowserScrollbarWidth()) {
             const { thumbHorizontal, thumbVertical, trackHorizontal, trackVertical } = this.refs;
             const { scrollLeft, clientWidth, scrollWidth } = values;
             const trackHorizontalWidth = getInnerWidth(trackHorizontal);
@@ -510,7 +521,7 @@ export default createClass({
     },
 
     render() {
-        const scrollbarWidth = getScrollbarWidth();
+        const scrollbarWidth = this.getBrowserScrollbarWidth();
         /* eslint-disable no-unused-vars */
         const {
             onScroll,
@@ -597,7 +608,10 @@ export default createClass({
             })
         };
 
-        return createElement(tagName, { ...props, style: containerStyle, ref: 'container' }, [
+        const containerProps = { ...props, style: containerStyle, ref: 'container' };
+        delete containerProps.browserScrollbarWidth;
+
+        return createElement(tagName, containerProps, [
             cloneElement(
                 renderView({ style: viewStyle }),
                 { key: 'view', ref: 'view' },
